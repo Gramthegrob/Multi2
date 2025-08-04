@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="Monitor and control your mosquitto light trap with real-time IoT dashboard" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>Mosquitto Trap Controller</title>
+    <style>
+      /* Custom slider styles */
+      .slider::-webkit-slider-thumb {
+        appearance: none;
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: #3b82f6;
+        cursor: pointer;
+        box-shadow: 0 0 2px 0 #0000001a;
+      }
+      
+      .slider::-moz-range-thumb {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: #3b82f6;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 0 2px 0 #0000001a;
+      }
+      
+      .slider:disabled::-webkit-slider-thumb {
+        background: #6b7280;
+        cursor: not-allowed;
+      }
+      
+      .slider:disabled::-moz-range-thumb {
+        background: #6b7280;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
