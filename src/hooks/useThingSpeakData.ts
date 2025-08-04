@@ -88,6 +88,14 @@ export const useThingSpeakData = () => {
 
   // Fetch latest data from ThingSpeak
   const fetchLatestData = useCallback(async () => {
+    // Don't attempt to fetch if configuration is incomplete
+    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.readApiKey || 
+        thingSpeakService['config'].readApiKey === 'YOUR_READ_API_KEY') {
+      setError('ThingSpeak not configured. Please set up your Channel ID and API keys.');
+      setTrapData(prev => ({ ...prev, isOnline: false }));
+      return;
+    }
+
     try {
       const latestEntry = await thingSpeakService.getLatestEntry();
       if (latestEntry) {
@@ -105,6 +113,12 @@ export const useThingSpeakData = () => {
 
   // Fetch historical data for charts
   const fetchHistoricalData = useCallback(async () => {
+    // Don't attempt to fetch if configuration is incomplete
+    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.readApiKey || 
+        thingSpeakService['config'].readApiKey === 'YOUR_READ_API_KEY') {
+      return;
+    }
+
     try {
       const channelData = await thingSpeakService.readChannelData(100);
       
@@ -128,6 +142,13 @@ export const useThingSpeakData = () => {
 
   // Update trap settings (send control commands to ThingSpeak)
   const updateTrapSettings = useCallback(async (settings: Partial<TrapData['trap']>) => {
+    // Don't attempt to write if configuration is incomplete
+    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.writeApiKey || 
+        thingSpeakService['config'].writeApiKey === 'YOUR_WRITE_API_KEY') {
+      setError('ThingSpeak write API key not configured. Cannot send control commands.');
+      return;
+    }
+
     try {
       const writeData: Record<string, string | number> = {};
       
