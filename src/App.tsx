@@ -1,10 +1,42 @@
 import React, { useEffect } from 'react';
 import { Dashboard } from './components/Dashboard';
-import { useMockData } from './hooks/useMockData';
+import { ThingSpeakSetup } from './components/ThingSpeakSetup';
+import { useThingSpeakData } from './hooks/useThingSpeakData';
+import { thingSpeakService, defaultThingSpeakConfig } from './services/thingspeak';
 import { Bug } from 'lucide-react';
 
 function App() {
-  const { trapData, historicalData, updateTrapSettings } = useMockData();
+  const { trapData, historicalData, updateTrapSettings, isLoading, error } = useThingSpeakData();
+
+  const handleConfigUpdate = (config: { channelId: string; readApiKey: string; writeApiKey: string }) => {
+    // Update the ThingSpeak service configuration
+    thingSpeakService['config'] = {
+      ...defaultThingSpeakConfig,
+      ...config
+    };
+    
+    // Store in localStorage for persistence
+    localStorage.setItem('thingspeak-config', JSON.stringify(config));
+    
+    // Reload the page to reinitialize with new config
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    // Load saved configuration from localStorage
+    const savedConfig = localStorage.getItem('thingspeak-config');
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        thingSpeakService['config'] = {
+          ...defaultThingSpeakConfig,
+          ...config
+        };
+      } catch (error) {
+        console.error('Error loading saved ThingSpeak config:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Register service worker for PWA
@@ -53,11 +85,38 @@ function App() {
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Dashboard 
-            trapData={trapData} 
-            historicalData={historicalData}
-            onUpdateSettings={updateTrapSettings}
-          />
+          <div className="space-y-6">
+            {/* ThingSpeak Configuration */}
+            <ThingSpeakSetup
+              onConfigUpdate={handleConfigUpdate}
+              currentConfig={{
+                channelId: thingSpeakService['config']?.channelId || '',
+                readApiKey: thingSpeakService['config']?.readApiKey || '',
+                writeApiKey: thingSpeakService['config']?.writeApiKey || '',
+              }}
+            />
+
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                <p className="text-red-400 text-sm">⚠️ {error}</p>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin h-8 w-8 border-2 border-blue-400 border-t-transparent rounded-full"></div>
+                <span className="ml-3 text-gray-400">Loading data from ThingSpeak...</span>
+              </div>
+            ) : (
+              <Dashboard 
+                trapData={trapData} 
+                historicalData={historicalData}
+                onUpdateSettings={updateTrapSettings}
+              />
+            )}
+          </div>
         </main>
 
         {/* Footer */}
