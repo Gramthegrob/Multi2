@@ -1,5 +1,5 @@
 import React from 'react';
-import { Battery, Sun, Eye, Thermometer, Droplets, Wifi } from 'lucide-react';
+import { Battery, Sun, Eye, Wifi } from 'lucide-react';
 import { StatusCard } from './StatusCard';
 import { Chart } from './Chart';
 import { TrapControls } from './TrapControls';
@@ -45,7 +45,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ trapData, historicalData, 
       </div>
 
       {/* Status Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
         <StatusCard
           title="Battery Level"
           value={trapData.battery.level}
@@ -74,23 +74,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ trapData, historicalData, 
           subtitle={trapData.ldr.lightLevel.toUpperCase()}
         />
         
-        <StatusCard
-          title="Temperature"
-          value={trapData.temperature.toFixed(1)}
-          unit="°C"
-          icon={Thermometer}
-          status="good"
-        />
-        
-        <StatusCard
-          title="Humidity"
-          value={trapData.humidity.toFixed(1)}
-          unit="%"
-          icon={Droplets}
-          status="good"
-        />
-        
-        <div className="sm:col-span-2 lg:col-span-1">
+        <div className="sm:col-span-2">
           <TrapControls trapData={trapData} onUpdateSettings={onUpdateSettings} />
         </div>
       </div>

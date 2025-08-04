@@ -68,14 +68,12 @@ export const ThingSpeakSetup: React.FC<ThingSpeakSetupProps> = ({ onConfigUpdate
             <h4 className="text-sm font-medium text-blue-400 mb-2">Setup Instructions</h4>
             <ol className="text-xs text-gray-300 space-y-1 list-decimal list-inside">
               <li>Create a ThingSpeak account at <a href="https://thingspeak.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">thingspeak.com</a></li>
-              <li>Create a new channel with 8 fields:
+              <li>Create a new channel with 6 fields:
                 <ul className="ml-4 mt-1 space-y-0.5 list-disc list-inside text-gray-400">
                   <li>Field 1: Battery Level (%)</li>
                   <li>Field 2: Solar Voltage (V)</li>
                   <li>Field 3: Solar Current (A)</li>
                   <li>Field 4: LDR Raw Value</li>
-                  <li>Field 5: Temperature (°C)</li>
-                  <li>Field 6: Humidity (%)</li>
                   <li>Field 7: Trap Status (0/1)</li>
                   <li>Field 8: Trap Intensity (%)</li>
                 </ul>

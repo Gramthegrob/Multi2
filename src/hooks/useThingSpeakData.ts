@@ -29,8 +29,6 @@ export const useThingSpeakData = () => {
       mode: 'manual',
     },
     lastUpdated: new Date().toISOString(),
-    temperature: 0,
-    humidity: 0,
   });
 
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
@@ -43,8 +41,6 @@ export const useThingSpeakData = () => {
     const solarVoltage = entry.field2 ? parseFloat(entry.field2) : 0;
     const solarCurrent = entry.field3 ? parseFloat(entry.field3) : 0;
     const ldrRaw = entry.field4 ? parseInt(entry.field4) : 0;
-    const temperature = entry.field5 ? parseFloat(entry.field5) : 0;
-    const humidity = entry.field6 ? parseFloat(entry.field6) : 0;
     const trapStatus = entry.field7 ? parseInt(entry.field7) === 1 : false;
     const trapIntensity = entry.field8 ? parseInt(entry.field8) : 0;
 
@@ -78,8 +74,6 @@ export const useThingSpeakData = () => {
         intensity: trapIntensity,
         mode: 'auto' as const,
       },
-      temperature,
-      humidity,
       lastUpdated: entry.created_at,
       isOnline: true,
       isActive: trapStatus,

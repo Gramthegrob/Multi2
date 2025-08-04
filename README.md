@@ -4,7 +4,7 @@ A Progressive Web App (PWA) for monitoring and controlling mosquitto light traps
 
 ## Features
 
-- **Real-time Monitoring**: Track battery levels, solar panel output, LDR sensor readings, temperature, and humidity
+- **Real-time Monitoring**: Track battery levels, solar panel output, LDR sensor readings, and trap controls
 - **Remote Control**: Turn trap on/off, adjust intensity, and set operating modes
 - **ThingSpeak Integration**: Seamless data logging and retrieval from ThingSpeak IoT platform
 - **Progressive Web App**: Install on mobile devices for native app experience
@@ -15,13 +15,11 @@ A Progressive Web App (PWA) for monitoring and controlling mosquitto light traps
 ## ThingSpeak Setup
 
 1. Create a free account at [ThingSpeak.com](https://thingspeak.com)
-2. Create a new channel with the following 8 fields:
+2. Create a new channel with the following 6 fields:
    - **Field 1**: Battery Level (%)
    - **Field 2**: Solar Voltage (V)
    - **Field 3**: Solar Current (A)
    - **Field 4**: LDR Raw Value (0-1024)
-   - **Field 5**: Temperature (°C)
-   - **Field 6**: Humidity (%)
    - **Field 7**: Trap Status (0=Off, 1=On)
    - **Field 8**: Trap Intensity (0-100%)
 
@@ -39,8 +37,6 @@ url += "&field1=" + String(batteryLevel);
 url += "&field2=" + String(solarVoltage);
 url += "&field3=" + String(solarCurrent);
 url += "&field4=" + String(ldrValue);
-url += "&field5=" + String(temperature);
-url += "&field6=" + String(humidity);
 url += "&field7=" + String(trapStatus);
 url += "&field8=" + String(trapIntensity);
 
@@ -55,7 +51,6 @@ int httpCode = http.GET();
 - **LDR Sensor**: Light level detection
 - **Solar Panel**: Power generation monitoring
 - **Car Battery**: Power storage with voltage monitoring
-- **Temperature/Humidity Sensor**: Environmental monitoring
 - **Relay/MOSFET**: Trap control circuit
 
 ## Installation

@@ -28,8 +28,6 @@ export const useMockData = () => {
       mode: 'auto',
     },
     lastUpdated: new Date().toISOString(),
-    temperature: 28.5,
-    humidity: 65,
   });
 
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
@@ -76,8 +74,6 @@ export const useMockData = () => {
           lightLevel: Math.random() > 0.5 ? 'dim' : Math.random() > 0.5 ? 'dark' : 'bright',
           percentage: Math.floor(Math.random() * 100),
         },
-        temperature: 25 + Math.random() * 8,
-        humidity: 60 + Math.random() * 20,
         lastUpdated: new Date().toISOString(),
       }));
     }, 3000);

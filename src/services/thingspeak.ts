@@ -13,8 +13,6 @@ export interface ThingSpeakEntry {
   field2?: string; // Solar Voltage
   field3?: string; // Solar Current
   field4?: string; // LDR Raw Value
-  field5?: string; // Temperature
-  field6?: string; // Humidity
   field7?: string; // Trap Status (0/1)
   field8?: string; // Trap Intensity
 }
@@ -30,8 +28,6 @@ export interface ThingSpeakResponse {
     field2: string;
     field3: string;
     field4: string;
-    field5: string;
-    field6: string;
     field7: string;
     field8: string;
     created_at: string;
