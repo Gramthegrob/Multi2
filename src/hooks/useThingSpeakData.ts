@@ -29,8 +29,7 @@ export const useThingSpeakData = () => {
       mode: 'manual',
     },
     lastUpdated: new Date().toISOString(),
-    temperature: 0,
-    humidity: 0,
+    // Removed temperature and humidity initialization
   });
 
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
@@ -43,8 +42,7 @@ export const useThingSpeakData = () => {
     const solarVoltage = entry.field2 ? parseFloat(entry.field2) : 0;
     const solarCurrent = entry.field3 ? parseFloat(entry.field3) : 0;
     const ldrRaw = entry.field4 ? parseInt(entry.field4) : 0;
-    const temperature = entry.field5 ? parseFloat(entry.field5) : 0;
-    const humidity = entry.field6 ? parseFloat(entry.field6) : 0;
+    // Removed temperature and humidity parsing
     const trapStatus = entry.field7 ? parseInt(entry.field7) === 1 : false;
     const trapIntensity = entry.field8 ? parseInt(entry.field8) : 0;
 
@@ -52,7 +50,7 @@ export const useThingSpeakData = () => {
     const solarPower = solarVoltage * solarCurrent;
     const batteryVoltage = 10.5 + (batteryLevel / 100) * 2.5; // Estimate 12V battery voltage
     const ldrPercentage = Math.round((ldrRaw / 1024) * 100);
-    
+
     let lightLevel: 'dark' | 'dim' | 'bright' = 'dark';
     if (ldrPercentage > 70) lightLevel = 'bright';
     else if (ldrPercentage > 30) lightLevel = 'dim';
@@ -78,8 +76,7 @@ export const useThingSpeakData = () => {
         intensity: trapIntensity,
         mode: 'auto' as const,
       },
-      temperature,
-      humidity,
+      // Removed temperature and humidity from return object
       lastUpdated: entry.created_at,
       isOnline: true,
       isActive: trapStatus,
@@ -89,7 +86,7 @@ export const useThingSpeakData = () => {
   // Fetch latest data from ThingSpeak
   const fetchLatestData = useCallback(async () => {
     // Don't attempt to fetch if configuration is incomplete
-    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.readApiKey || 
+    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.readApiKey ||
         thingSpeakService['config'].readApiKey === 'YOUR_READ_API_KEY') {
       setError('ThingSpeak not configured. Please set up your Channel ID and API keys.');
       setTrapData(prev => ({ ...prev, isOnline: false }));
@@ -97,14 +94,20 @@ export const useThingSpeakData = () => {
     }
 
     try {
+      setError(null);
       const latestEntry = await thingSpeakService.getLatestEntry();
+
       if (latestEntry) {
         const updatedData = convertThingSpeakEntry(latestEntry);
-        setTrapData(prev => ({ ...prev, ...updatedData }));
-        setError(null);
+        setTrapData(prev => ({
+          ...prev,
+          ...updatedData,
+        }));
+      } else {
+        setTrapData(prev => ({ ...prev, isOnline: false }));
       }
     } catch (err) {
-      setError('Failed to fetch latest data from ThingSpeak');
+      setError('Failed to fetch data from ThingSpeak');
       console.error('Error fetching latest data:', err);
       // Set offline status
       setTrapData(prev => ({ ...prev, isOnline: false }));
@@ -114,24 +117,24 @@ export const useThingSpeakData = () => {
   // Fetch historical data for charts
   const fetchHistoricalData = useCallback(async () => {
     // Don't attempt to fetch if configuration is incomplete
-    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.readApiKey || 
+    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.readApiKey ||
         thingSpeakService['config'].readApiKey === 'YOUR_READ_API_KEY') {
       return;
     }
 
     try {
       const channelData = await thingSpeakService.readChannelData(100);
-      
+
       const historical: HistoricalData[] = channelData.feeds
-        .filter(feed => feed.field1) // Only include entries with battery data
-        .map(feed => ({
-          timestamp: feed.created_at,
-          batteryLevel: parseFloat(feed.field1 || '0'),
-          solarPower: (parseFloat(feed.field2 || '0') * parseFloat(feed.field3 || '0')),
-          lightLevel: Math.round((parseInt(feed.field4 || '0') / 1024) * 100),
-          trapStatus: parseInt(feed.field7 || '0') === 1,
-        }))
-        .reverse(); // Most recent first
+          .filter(feed => feed.field1) // Only include entries with battery data
+          .map(feed => ({
+            timestamp: feed.created_at,
+            batteryLevel: parseFloat(feed.field1 || '0'),
+            solarPower: (parseFloat(feed.field2 || '0') * parseFloat(feed.field3 || '0')),
+            lightLevel: Math.round((parseInt(feed.field4 || '0') / 1024) * 100),
+            trapStatus: parseInt(feed.field7 || '0') === 1,
+          }))
+          .reverse(); // Most recent first
 
       setHistoricalData(historical);
     } catch (err) {
@@ -143,7 +146,7 @@ export const useThingSpeakData = () => {
   // Update trap settings (send control commands to ThingSpeak)
   const updateTrapSettings = useCallback(async (settings: Partial<TrapData['trap']>) => {
     // Don't attempt to write if configuration is incomplete
-    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.writeApiKey || 
+    if (!thingSpeakService['config']?.channelId || !thingSpeakService['config']?.writeApiKey ||
         thingSpeakService['config'].writeApiKey === 'YOUR_WRITE_API_KEY') {
       setError('ThingSpeak write API key not configured. Cannot send control commands.');
       return;
@@ -151,24 +154,24 @@ export const useThingSpeakData = () => {
 
     try {
       const writeData: Record<string, string | number> = {};
-      
+
       if (settings.isOn !== undefined) {
         writeData.field7 = settings.isOn ? 1 : 0;
       }
-      
+
       if (settings.intensity !== undefined) {
         writeData.field8 = settings.intensity;
       }
 
       const success = await thingSpeakService.writeData(writeData);
-      
+
       if (success) {
         // Update local state immediately for better UX
         setTrapData(prev => ({
           ...prev,
           trap: { ...prev.trap, ...settings },
         }));
-        
+
         // Fetch latest data after a short delay to confirm the update
         setTimeout(fetchLatestData, 2000);
       } else {
@@ -202,12 +205,12 @@ export const useThingSpeakData = () => {
     };
   }, [fetchLatestData, fetchHistoricalData]);
 
-  return { 
-    trapData, 
-    historicalData, 
-    updateTrapSettings, 
-    isLoading, 
+  return {
+    trapData,
+    historicalData,
+    updateTrapSettings,
+    isLoading,
     error,
-    refreshData: fetchLatestData 
+    refreshData: fetchLatestData
   };
 };

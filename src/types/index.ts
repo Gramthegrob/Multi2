@@ -29,8 +29,9 @@ export interface TrapData {
     };
   };
   lastUpdated: string;
-  temperature: number;
-  humidity: number;
+  // Make these optional for now to prevent errors
+  temperature?: number;
+  humidity?: number;
 }
 
 export interface HistoricalData {

@@ -13,8 +13,7 @@ export interface ThingSpeakEntry {
   field2?: string; // Solar Voltage
   field3?: string; // Solar Current
   field4?: string; // LDR Raw Value
-  field5?: string; // Temperature
-  field6?: string; // Humidity
+  // Removed field5 (Temperature) and field6 (Humidity)
   field7?: string; // Trap Status (0/1)
   field8?: string; // Trap Intensity
 }
@@ -30,8 +29,6 @@ export interface ThingSpeakResponse {
     field2: string;
     field3: string;
     field4: string;
-    field5: string;
-    field6: string;
     field7: string;
     field8: string;
     created_at: string;
@@ -51,7 +48,7 @@ class ThingSpeakService {
   // Read data from ThingSpeak channel
   async readChannelData(results: number = 100): Promise<ThingSpeakResponse> {
     const url = `${this.config.baseUrl}/channels/${this.config.channelId}/feeds.json?api_key=${this.config.readApiKey}&results=${results}`;
-    
+
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -67,7 +64,7 @@ class ThingSpeakService {
   // Get latest entry from channel
   async getLatestEntry(): Promise<ThingSpeakEntry | null> {
     const url = `${this.config.baseUrl}/channels/${this.config.channelId}/feeds/last.json?api_key=${this.config.readApiKey}`;
-    
+
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -84,7 +81,7 @@ class ThingSpeakService {
   async writeData(data: Partial<Record<string, string | number>>): Promise<boolean> {
     const params = new URLSearchParams();
     params.append('api_key', this.config.writeApiKey);
-    
+
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         params.append(key, value.toString());
@@ -92,7 +89,7 @@ class ThingSpeakService {
     });
 
     const url = `${this.config.baseUrl}/update`;
-    
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -101,7 +98,7 @@ class ThingSpeakService {
         },
         body: params.toString(),
       });
-      
+
       return response.ok;
     } catch (error) {
       console.error('Error writing to ThingSpeak:', error);
@@ -112,33 +109,32 @@ class ThingSpeakService {
   // Get field data for charts
   async getFieldData(fieldNumber: number, results: number = 100): Promise<Array<{created_at: string, value: number}>> {
     const url = `${this.config.baseUrl}/channels/${this.config.channelId}/fields/${fieldNumber}.json?api_key=${this.config.readApiKey}&results=${results}`;
-    
+
     try {
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`ThingSpeak API error: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      return data.feeds
-        .filter((feed: any) => feed[`field${fieldNumber}`] !== null)
-        .map((feed: any) => ({
-          created_at: feed.created_at,
-          value: parseFloat(feed[`field${fieldNumber}`]) || 0
-        }));
+      return data.feeds.map((feed: any) => ({
+        created_at: feed.created_at,
+        value: parseFloat(feed[`field${fieldNumber}`] || '0')
+      }));
     } catch (error) {
-      console.error(`Error fetching field ${fieldNumber} data:`, error);
+      console.error('Error fetching field data:', error);
       return [];
     }
   }
 }
 
-// Default configuration - users should update these values
-export const defaultThingSpeakConfig: ThingSpeakConfig = {
-  channelId: '2739166', // Example channel ID - replace with your actual channel
-  readApiKey: 'YOUR_READ_API_KEY', // Replace with your read API key
-  writeApiKey: 'YOUR_WRITE_API_KEY', // Replace with your write API key
+// Default configuration
+const defaultConfig: ThingSpeakConfig = {
+  channelId: '',
+  readApiKey: 'YOUR_READ_API_KEY',
+  writeApiKey: 'YOUR_WRITE_API_KEY',
   baseUrl: 'https://api.thingspeak.com'
 };
 
-export const thingSpeakService = new ThingSpeakService(defaultThingSpeakConfig);
+export const thingSpeakService = new ThingSpeakService(defaultConfig);
+export default ThingSpeakService;
